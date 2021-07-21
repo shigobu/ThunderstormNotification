@@ -29,6 +29,8 @@ namespace ThunderstormNotification
     {
         private DispatcherTimer timer;
 
+        private float comparisonResult = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -45,12 +47,27 @@ namespace ThunderstormNotification
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private async void Timer_Tick(object sender, EventArgs e)
         {
-            ComparisonImage();
+            float prev = comparisonResult;
 
-            var notificationManager = new NotificationManager();
-            notificationManager.Show(this.Title, "雷雨っぽい", NotificationType.Information);
+            await ComparisonImage();
+
+            float aftar = comparisonResult;
+
+            if (!float.TryParse(thresholdTextBox.Text, out float threshold))
+            {
+                //失敗したら終了
+                return;
+            }
+
+            //前がしきい値以上で、あとがしきい値以下の場合
+            if (prev > threshold && aftar < threshold)
+            {
+                var notificationManager = new NotificationManager();
+                notificationManager.Show(this.Title, "雷雨っぽい", NotificationType.Information);
+                System.Media.SystemSounds.Asterisk.Play();
+            }
         }
 
         /// <summary>
@@ -161,7 +178,7 @@ namespace ThunderstormNotification
         /// <summary>
         /// 標準画像と比較し、スコアを更新します。
         /// </summary>
-        private async void ComparisonImage()
+        private async Task ComparisonImage()
         {
             string[] fileNames = GetImageFileNames();
             if (fileNames.Length == 0)
@@ -187,6 +204,7 @@ namespace ThunderstormNotification
                         }
                     }
                 }
+                comparisonResult = result;
                 resultTextBox.Text = result.ToString("f");
             }
 
