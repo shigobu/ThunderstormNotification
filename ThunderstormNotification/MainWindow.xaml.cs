@@ -67,12 +67,30 @@ namespace ThunderstormNotification
         private async void SetButton_Click(object sender, RoutedEventArgs e)
         {
             string assemblyDir = GetAssemblyDirectory();
-            string imagePath = Path.Combine(assemblyDir, "雷雨.png");
+            int fileCount = 1;
+            string imagePath = Path.Combine(assemblyDir, $"雷雨{fileCount}.png");
+            while (File.Exists(imagePath))
+            {
+                fileCount++;
+                imagePath = Path.Combine(assemblyDir, $"雷雨{fileCount}.png");
+            }
 
             using (FileStream fileStream = new FileStream(imagePath, FileMode.Create))
             {
                 await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, fileStream);
             }
+
+            CountImage();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            CountImage();
+        }
+
+        private void TestButton_Click(object sender, RoutedEventArgs e)
+        {
+            ComparisonImage();
         }
 
         /// <summary>
@@ -94,6 +112,20 @@ namespace ThunderstormNotification
             Assembly myAssembly = Assembly.GetEntryAssembly();
             string assemblyPath = myAssembly.Location;
             return Path.GetDirectoryName(assemblyPath);
+        }
+
+        /// <summary>
+        /// 比較用の画像の数を数えて表示の更新を行います。
+        /// </summary>
+        private void CountImage()
+        {
+            IEnumerable<string> files = Directory.EnumerateFiles(GetAssemblyDirectory(), "雷雨*");
+            imageCountTextBox.Text = files.Count().ToString();
+        }
+
+        private void ComparisonImage()
+        {
+
         }
     }
 }

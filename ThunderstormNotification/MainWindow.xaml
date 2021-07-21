@@ -6,7 +6,7 @@
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:local="clr-namespace:ThunderstormNotification"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" SizeToContent="WidthAndHeight" Loaded="Window_Loaded">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" Margin="3">
@@ -17,14 +17,15 @@
                 <TextBox Name="resultTextBox" IsReadOnly="True" Width="40" Margin="3"/>
                 <TextBlock Text="しきい値" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
                 <TextBox Name="thresholdTextBox" IsReadOnly="False" Width="40" Margin="3"/>
-            </StackPanel>
+				<Button Name="testButton" Margin="3" Content="test" Click="TestButton_Click"/>
+			</StackPanel>
             <DockPanel>
                 <Button x:Name="ButtonGo" DockPanel.Dock="Right" Click="ButtonGo_Click" Content="Go"/>
                 <TextBox Name = "addressBar" KeyUp="AddressBar_KeyUp"/>
             </DockPanel>
             <ProgressBar Name="progressBar"/>
         </StackPanel>
-        <wv2:WebView2 Name="webView"
-                    Source="https://www.microsoft.com" NavigationStarting="WebView_NavigationStarting" NavigationCompleted="WebView_NavigationCompleted"/>
+        <wv2:WebView2 Name="webView" Width="850" Height="477"
+                    Source="https://www.youtube.com/channel/UC0uqvdnOJBflreC3WJEpFyQ" NavigationStarting="WebView_NavigationStarting" NavigationCompleted="WebView_NavigationCompleted"/>
     </DockPanel>
 </Window>
