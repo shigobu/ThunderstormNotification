@@ -14,7 +14,7 @@
                 <TextBlock Text="基準画像枚数" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
                 <TextBox Name="imageCountTextBox" IsReadOnly="True" Width="40" Margin="3"/>
                 <TextBlock Text="比較結果" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
-                <TextBox Name="resultTextBox" IsReadOnly="True" Width="40" Margin="3"/>
+                <TextBox Name="resultTextBox" IsReadOnly="True" Width="50" Margin="3"/>
                 <TextBlock Text="しきい値" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
                 <TextBox Name="thresholdTextBox" IsReadOnly="False" Width="40" Margin="3"/>
 				<Button Name="testButton" Margin="3" Content="test" Click="TestButton_Click"/>

@@ -14,17 +14,43 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using Microsoft.Web.WebView2.Core;
 using System.IO;
+using OpenCvSharp;
+using System.Drawing;
+using OpenCvSharp.Extensions;
+using System.Windows.Threading;
+using Notification.Wpf;
 
 namespace ThunderstormNotification
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
+        private DispatcherTimer timer;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            timer = new DispatcherTimer();
+            timer.Interval = new TimeSpan(0, 0, 2);
+            timer.Tick += Timer_Tick;
+            timer.Start();
+
+            // 画面が閉じられるときに、タイマを停止（ラムダ式で記述）
+            this.Closing += (s, e) => timer.Stop();
+
+            //画面閉じたときに、通知も閉じるように設定
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            ComparisonImage();
+
+            var notificationManager = new NotificationManager();
+            notificationManager.Show(this.Title, "雷雨っぽい", NotificationType.Information);
         }
 
         /// <summary>
@@ -119,12 +145,93 @@ namespace ThunderstormNotification
         /// </summary>
         private void CountImage()
         {
-            IEnumerable<string> files = Directory.EnumerateFiles(GetAssemblyDirectory(), "雷雨*");
-            imageCountTextBox.Text = files.Count().ToString();
+            imageCountTextBox.Text = GetImageFileNames().Length.ToString();
         }
 
-        private void ComparisonImage()
+        /// <summary>
+        /// 比較用ファイル名一覧を取得します。
+        /// </summary>
+        /// <returns></returns>
+        private string[] GetImageFileNames()
         {
+            IEnumerable<string> files = Directory.EnumerateFiles(GetAssemblyDirectory(), "雷雨*");
+            return files.ToArray();
+        }
+
+        /// <summary>
+        /// 標準画像と比較し、スコアを更新します。
+        /// </summary>
+        private async void ComparisonImage()
+        {
+            string[] fileNames = GetImageFileNames();
+            if (fileNames.Length == 0)
+            {
+                return;
+            }
+
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
+                float result = float.MaxValue;
+                foreach (string fileName in fileNames)
+                {
+                    using (Bitmap bitmap1 = new Bitmap(memoryStream))
+                    using (Bitmap bitmap2 = new Bitmap(fileName))
+                    using (Mat mat1 = bitmap1.ToMat())
+                    using (Mat mat2 = bitmap2.ToMat())
+                    {
+                        float match = ImageMatch(mat1, mat2, false);
+                        if (match < result)
+                        {
+                            result = match;
+                        }
+                    }
+                }
+                resultTextBox.Text = result.ToString("f");
+            }
+
+        }
+
+        /// <summary>
+        /// 2つの画像の類似度をチェックする
+        /// </summary>
+        /// <param name="mat1"></param>
+        /// <param name="mat2"></param>
+        /// <param name="show">画像を表示するかのフラグ</param>
+        /// <returns></returns>
+        private float ImageMatch(Mat mat1, Mat mat2, bool show)
+        {
+
+            using (var descriptors1 = new Mat())
+            using (var descriptors2 = new Mat())
+            {
+
+                // 特徴点を検出
+                var akaze = AKAZE.Create();
+
+                // キーポイントを検出
+                akaze.DetectAndCompute(mat1, null, out KeyPoint[] keyPoints1, descriptors1);
+                akaze.DetectAndCompute(mat2, null, out KeyPoint[] keyPoints2, descriptors2);
+
+                // それぞれの特徴量をマッチング
+                var matcher = new BFMatcher(NormTypes.Hamming, false);
+                var matches = matcher.Match(descriptors1, descriptors2);
+
+                // 2つの画像のマッチング結果を表示
+                if (show)
+                {
+                    using (var drowMatch = new Mat())
+                    {
+                        Cv2.DrawMatches(mat1, keyPoints1, mat2, keyPoints2, matches, drowMatch);
+                        Cv2.ImShow("image match", drowMatch);
+                    }
+                }
+
+                // 平均距離を返却(小さい方が類似度が高い)
+                var sum = matches.Sum(x => x.Distance);
+                return sum / matches.Length;
+
+            }
 
         }
     }
