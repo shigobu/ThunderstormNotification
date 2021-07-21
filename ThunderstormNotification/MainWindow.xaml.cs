@@ -24,5 +24,42 @@ namespace ThunderstormNotification
         {
             InitializeComponent();
         }
+
+        private void ButtonGo_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationToAddressBar();
+        }
+
+        private void AddressBar_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                NavigationToAddressBar();
+            }
+        }
+
+        private void WebView_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
+        {
+            progressBar.IsIndeterminate = true;
+
+            addressBar.Text = e.Uri;
+        }
+
+        private void WebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        {
+            progressBar.IsIndeterminate = false;
+        }
+
+        /// <summary>
+        /// アドレスバーに入力されているアドレスへ移動します。
+        /// </summary>
+        private void NavigationToAddressBar()
+        {
+            if (webView != null && webView.CoreWebView2 != null)
+            {
+                webView.CoreWebView2.Navigate(addressBar.Text);
+            }
+
+        }
     }
 }
