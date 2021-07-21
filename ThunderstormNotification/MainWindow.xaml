@@ -11,6 +11,12 @@
         <StackPanel DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" Margin="3">
                 <Button Name="setButton" Content="雷雨登録" Margin="3" Click="SetButton_Click"/>
+                <TextBlock Text="基準画像枚数" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
+                <TextBox Name="imageCountTextBox" IsReadOnly="True" Width="40" Margin="3"/>
+                <TextBlock Text="比較結果" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
+                <TextBox Name="resultTextBox" IsReadOnly="True" Width="40" Margin="3"/>
+                <TextBlock Text="しきい値" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
+                <TextBox Name="thresholdTextBox" IsReadOnly="False" Width="40" Margin="3"/>
             </StackPanel>
             <DockPanel>
                 <Button x:Name="ButtonGo" DockPanel.Dock="Right" Click="ButtonGo_Click" Content="Go"/>
