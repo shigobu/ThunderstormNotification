@@ -9,6 +9,9 @@
         Title="MainWindow" Height="450" Width="800">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top">
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <Button Name="setButton" Content="雷雨登録" Margin="3" Click="SetButton_Click"/>
+            </StackPanel>
             <DockPanel>
                 <Button x:Name="ButtonGo" DockPanel.Dock="Right" Click="ButtonGo_Click" Content="Go"/>
                 <TextBox Name = "addressBar" KeyUp="AddressBar_KeyUp"/>

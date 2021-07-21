@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,7 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.Web.WebView2.Core;
+using System.IO;
 
 namespace ThunderstormNotification
 {
@@ -25,11 +27,17 @@ namespace ThunderstormNotification
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Goボタン押下時イベントハンドラ
+        /// </summary>
         private void ButtonGo_Click(object sender, RoutedEventArgs e)
         {
             NavigationToAddressBar();
         }
 
+        /// <summary>
+        /// アドレスバーのキーアップイベントハンドラ
+        /// </summary>
         private void AddressBar_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return)
@@ -38,16 +46,35 @@ namespace ThunderstormNotification
             }
         }
 
-        private void WebView_NavigationStarting(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs e)
+        /// <summary>
+        /// ナビゲーション開始時イベントハンドラ
+        /// </summary>
+        private void WebView_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
         {
             progressBar.IsIndeterminate = true;
 
             addressBar.Text = e.Uri;
         }
 
-        private void WebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        /// <summary>
+        /// ナビゲーション成功時イベントハンドラ
+        /// </summary>
+        private void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             progressBar.IsIndeterminate = false;
+        }
+
+        private async void SetButton_Click(object sender, RoutedEventArgs e)
+        {
+            Assembly myAssembly = Assembly.GetEntryAssembly();
+            string assemblyPath = myAssembly.Location;
+            string assemblyDir = Path.GetDirectoryName(assemblyPath);
+            string imagePath = Path.Combine(assemblyDir, "雷雨.png");
+
+            using (FileStream fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, fileStream);
+            }
         }
 
         /// <summary>
