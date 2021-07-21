@@ -66,9 +66,7 @@ namespace ThunderstormNotification
 
         private async void SetButton_Click(object sender, RoutedEventArgs e)
         {
-            Assembly myAssembly = Assembly.GetEntryAssembly();
-            string assemblyPath = myAssembly.Location;
-            string assemblyDir = Path.GetDirectoryName(assemblyPath);
+            string assemblyDir = GetAssemblyDirectory();
             string imagePath = Path.Combine(assemblyDir, "雷雨.png");
 
             using (FileStream fileStream = new FileStream(imagePath, FileMode.Create))
@@ -86,7 +84,16 @@ namespace ThunderstormNotification
             {
                 webView.CoreWebView2.Navigate(addressBar.Text);
             }
+        }
 
+        /// <summary>
+        /// exeのあるディレクトリを返します。
+        /// </summary>
+        private string GetAssemblyDirectory()
+        {
+            Assembly myAssembly = Assembly.GetEntryAssembly();
+            string assemblyPath = myAssembly.Location;
+            return Path.GetDirectoryName(assemblyPath);
         }
     }
 }
