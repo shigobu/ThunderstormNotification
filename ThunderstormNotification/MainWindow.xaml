@@ -17,7 +17,6 @@
                 <TextBox Name="resultTextBox" IsReadOnly="True" Width="50" Margin="3"/>
                 <TextBlock Text="しきい値" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
                 <TextBox Name="thresholdTextBox" Text="100" IsReadOnly="False" Width="40" Margin="3"/>
-				<Button Name="testButton" Margin="3" Content="test" Click="TestButton_Click"/>
 			</StackPanel>
             <DockPanel>
                 <Button x:Name="ButtonGo" DockPanel.Dock="Right" Click="ButtonGo_Click" Content="Go"/>

@@ -131,11 +131,6 @@ namespace ThunderstormNotification
             CountImage();
         }
 
-        private void TestButton_Click(object sender, RoutedEventArgs e)
-        {
-            ComparisonImage();
-        }
-
         /// <summary>
         /// アドレスバーに入力されているアドレスへ移動します。
         /// </summary>
