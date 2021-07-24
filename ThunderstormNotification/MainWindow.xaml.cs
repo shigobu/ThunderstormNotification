@@ -34,6 +34,8 @@ namespace ThunderstormNotification
 
         private List<Bitmap> bitmaps = new List<Bitmap>();
 
+        static System.Threading.SemaphoreSlim _semaphore = new System.Threading.SemaphoreSlim(1, 1);
+
         public MainWindow()
         {
             InitializeComponent();
@@ -140,7 +142,15 @@ namespace ThunderstormNotification
             using (FileStream fileStream = new FileStream(imagePath, FileMode.Create))
             {
                 await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, fileStream);
-                bitmaps.Add(new Bitmap(fileStream));
+                await _semaphore.WaitAsync(); // ロックを取得する
+                try
+                {
+                    bitmaps.Add(new Bitmap(fileStream));
+                }
+                finally
+                {
+                    _semaphore.Release(); // 違うスレッドでロックを解放してもOK
+                }
             }
 
             CountImage();
@@ -209,18 +219,26 @@ namespace ThunderstormNotification
             {
                 await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
                 float result = float.MaxValue;
-                foreach (Bitmap bitmap in bitmaps)
+                await _semaphore.WaitAsync(); // ロックを取得する
+                try
                 {
-                    using (Bitmap bitmap1 = new Bitmap(memoryStream))
-                    using (Mat mat1 = bitmap1.ToMat())
-                    using (Mat mat2 = bitmap.ToMat())
+                    foreach (Bitmap bitmap in bitmaps)
                     {
-                        float match = ImageMatch(mat1, mat2, false);
-                        if (match < result)
+                        using (Bitmap bitmap1 = new Bitmap(memoryStream))
+                        using (Mat mat1 = bitmap1.ToMat())
+                        using (Mat mat2 = bitmap.ToMat())
                         {
-                            result = match;
+                            float match = await Task.Run(() => ImageMatch(mat1, mat2, false));
+                            if (match < result)
+                            {
+                                result = match;
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    _semaphore.Release(); // 違うスレッドでロックを解放してもOK
                 }
                 comparisonResult = result;
 
