@@ -19,6 +19,7 @@ using System.Drawing;
 using OpenCvSharp.Extensions;
 using System.Windows.Threading;
 using Notification.Wpf;
+using System.Runtime.InteropServices;
 
 namespace ThunderstormNotification
 {
@@ -30,6 +31,8 @@ namespace ThunderstormNotification
         private DispatcherTimer timer;
 
         private float comparisonResult = 0;
+
+        private List<Bitmap> bitmaps = new List<Bitmap>();
 
         public MainWindow()
         {
@@ -51,9 +54,10 @@ namespace ThunderstormNotification
         {
             float prev = comparisonResult;
 
-            await ComparisonImage();
+            ImageSource imageSource = await ComparisonImage();
 
             float aftar = comparisonResult;
+            resultTextBox.Text = comparisonResult.ToString("f");
 
             if (!float.TryParse(thresholdTextBox.Text, out float threshold))
             {
@@ -61,11 +65,26 @@ namespace ThunderstormNotification
                 return;
             }
 
+            if (imageSource == null)
+            {
+                return;
+            }
+
             //前がしきい値以上で、あとがしきい値以下の場合
             if (prev > threshold && aftar < threshold)
             {
+                StackPanel stackPanel = new StackPanel();
+                TextBlock textBlock = new TextBlock();
+                textBlock.Text = "雷雨っぽい";
+                textBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+                image.Source = imageSource;
+                stackPanel.Children.Add(textBlock);
+                stackPanel.Children.Add(image);
+
                 var notificationManager = new NotificationManager();
-                notificationManager.Show(this.Title, "雷雨っぽい", NotificationType.Information);
+                //notificationManager.Show(this.Title, "雷雨っぽい", NotificationType.Information);
+                notificationManager.Show(stackPanel, null);
                 System.Media.SystemSounds.Asterisk.Play();
             }
         }
@@ -121,6 +140,7 @@ namespace ThunderstormNotification
             using (FileStream fileStream = new FileStream(imagePath, FileMode.Create))
             {
                 await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, fileStream);
+                bitmaps.Add(new Bitmap(fileStream));
             }
 
             CountImage();
@@ -128,6 +148,10 @@ namespace ThunderstormNotification
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            foreach (var fileName in GetImageFileNames())
+            {
+                bitmaps.Add(new Bitmap(fileName));
+            }
             CountImage();
         }
 
@@ -171,26 +195,25 @@ namespace ThunderstormNotification
         }
 
         /// <summary>
-        /// 標準画像と比較し、スコアを更新します。
+        /// 標準画像と比較し、comparisonResultメンバー変数を更新します。
         /// </summary>
-        private async Task ComparisonImage()
+        private async Task<ImageSource> ComparisonImage()
         {
             string[] fileNames = GetImageFileNames();
             if (fileNames.Length == 0)
             {
-                return;
+                return null;
             }
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
                 float result = float.MaxValue;
-                foreach (string fileName in fileNames)
+                foreach (Bitmap bitmap in bitmaps)
                 {
                     using (Bitmap bitmap1 = new Bitmap(memoryStream))
-                    using (Bitmap bitmap2 = new Bitmap(fileName))
                     using (Mat mat1 = bitmap1.ToMat())
-                    using (Mat mat2 = bitmap2.ToMat())
+                    using (Mat mat2 = bitmap.ToMat())
                     {
                         float match = ImageMatch(mat1, mat2, false);
                         if (match < result)
@@ -200,9 +223,20 @@ namespace ThunderstormNotification
                     }
                 }
                 comparisonResult = result;
-                resultTextBox.Text = result.ToString("f");
-            }
 
+                return BitmapFrame.Create(memoryStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        private Stream CapturePreview(Stream stream)
+        {
+            webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
+            return stream;
         }
 
         /// <summary>
