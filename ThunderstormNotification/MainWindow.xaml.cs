@@ -40,11 +40,6 @@ namespace ThunderstormNotification
         {
             InitializeComponent();
 
-            timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(0, 0, 2);
-            timer.Tick += Timer_Tick;
-            timer.Start();
-
             // 画面が閉じられるときに、タイマを停止（ラムダ式で記述）
             this.Closing += (s, e) => timer.Stop();
 
@@ -163,6 +158,12 @@ namespace ThunderstormNotification
                 bitmaps.Add(new Bitmap(fileName));
             }
             CountImage();
+
+            //タイマ作成とスタート
+            timer = new DispatcherTimer();
+            timer.Interval = new TimeSpan(0, 0, 2);
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
 
         /// <summary>
