@@ -6,7 +6,7 @@
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:local="clr-namespace:ThunderstormNotification"
         mc:Ignorable="d"
-        Title="雷雨通知" SizeToContent="WidthAndHeight" Loaded="Window_Loaded">
+        Title="雷雨通知" SizeToContent="WidthAndHeight" Loaded="Window_Loaded" ResizeMode="CanMinimize">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" Margin="3">
@@ -24,7 +24,18 @@
             </DockPanel>
             <ProgressBar Name="progressBar"/>
         </StackPanel>
-        <wv2:WebView2 Name="webView" Width="850" Height="477"
-                    Source="https://www.youtube.com/channel/UC0uqvdnOJBflreC3WJEpFyQ" NavigationStarting="WebView_NavigationStarting" NavigationCompleted="WebView_NavigationCompleted"/>
+        <Canvas Width="850" Height="477">
+            <wv2:WebView2 Name="webView" Width="850" Height="477"
+                        Source="https://www.youtube.com/channel/UC0uqvdnOJBflreC3WJEpFyQ" NavigationStarting="WebView_NavigationStarting" NavigationCompleted="WebView_NavigationCompleted"/>
+            <Popup IsOpen="True"
+               AllowsTransparency="True"
+               Placement="Center"
+               PlacementTarget="{Binding ElementName=webView}">
+                    <TextBlock Text="WebBrowser Control"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+            </Popup>
+        </Canvas>
+        
     </DockPanel>
 </Window>
