@@ -27,10 +27,8 @@
         <Canvas Width="850" Height="477">
             <wv2:WebView2 Name="webView" Width="850" Height="477"
                         Source="https://www.youtube.com/channel/UC0uqvdnOJBflreC3WJEpFyQ" NavigationStarting="WebView_NavigationStarting" NavigationCompleted="WebView_NavigationCompleted"/>
-            <Popup IsOpen="True"
-               AllowsTransparency="True"
-               Placement="Center"
-               PlacementTarget="{Binding ElementName=webView}">
+            <!--WebView2は特殊な描画方法を使用しているため、普通の方法ではコントロールのオーバーレイができない。Popupを使用することで回避できる。-->
+            <Popup IsOpen="True" AllowsTransparency="True" Placement="Center" PlacementTarget="{Binding ElementName=webView}">
                     <TextBlock Text="WebBrowser Control"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center" />
