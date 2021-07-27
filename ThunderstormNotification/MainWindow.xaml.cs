@@ -80,7 +80,6 @@ namespace ThunderstormNotification
                 stackPanel.Children.Add(image);
 
                 var notificationManager = new NotificationManager();
-                //notificationManager.Show(this.Title, "雷雨っぽい", NotificationType.Information);
                 notificationManager.Show(stackPanel, null);
                 System.Media.SystemSounds.Asterisk.Play();
             }
@@ -121,6 +120,77 @@ namespace ThunderstormNotification
         private void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             progressBar.IsIndeterminate = false;
+        }
+
+        /// <summary>
+        /// マウス押下時の座標
+        /// </summary>
+        private System.Windows.Point clickPoint = new System.Windows.Point(0, 0);
+
+        /// <summary>
+        /// 比較範囲描画用
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // マウス押下時の座標を保持
+            clickPoint = e.GetPosition(this.drawCanvas);
+            Canvas.SetLeft(ComparisonAreaRect, clickPoint.X);
+            Canvas.SetTop(ComparisonAreaRect, clickPoint.Y);
+
+            ComparisonAreaRect.Width = 0;
+            ComparisonAreaRect.Height = 0;
+
+        }
+
+        /// <summary>
+        /// 比較範囲描画用
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            // 「マウスを左クリックしていないとき、描画中のオブジェクトが無いとき」は何もしない
+            if (e.LeftButton == MouseButtonState.Released)
+            {
+                return;
+            }
+
+            // クリック座標とマウス座標から、長方形の位置とサイズを求める
+            // ※小さい座標が左上位置、大きい座標がサイズ※
+            System.Windows.Point mousePoint = e.GetPosition(drawCanvas);
+            double x = Math.Min(mousePoint.X, this.clickPoint.X);
+            double y = Math.Min(mousePoint.Y, this.clickPoint.Y);
+            double width = Math.Max(mousePoint.X, this.clickPoint.X) - x;
+            double height = Math.Max(mousePoint.Y, this.clickPoint.Y) - y;
+
+            // 描画中オブジェクトの情報を更新
+            ComparisonAreaRect.Width = width;
+            ComparisonAreaRect.Height = height;
+            Canvas.SetLeft(ComparisonAreaRect, x);
+            Canvas.SetTop(ComparisonAreaRect, y);
+        }
+
+        /// <summary>
+        /// 比較範囲描画用
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            CanvasImage.Visibility = Visibility.Hidden;
+        }
+
+        private async void SetRectButton_Click(object sender, RoutedEventArgs e)
+        {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
+                ImageSource imageSource = BitmapFrame.Create(memoryStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                CanvasImage.Source = imageSource;
+                CanvasImage.Visibility = Visibility.Visible;
+            }
         }
 
         private async void SetButton_Click(object sender, RoutedEventArgs e)
@@ -250,17 +320,6 @@ namespace ThunderstormNotification
 
                 return BitmapFrame.Create(memoryStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="stream"></param>
-        /// <returns></returns>
-        private Stream CapturePreview(Stream stream)
-        {
-            webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
-            return stream;
         }
 
         /// <summary>
