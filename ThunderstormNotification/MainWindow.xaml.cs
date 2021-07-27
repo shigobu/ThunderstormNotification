@@ -127,6 +127,8 @@ namespace ThunderstormNotification
         /// </summary>
         private System.Windows.Point clickPoint = new System.Windows.Point(0, 0);
 
+        private bool? prevViewRectCheckedState = false;
+
         /// <summary>
         /// 比較範囲描画用
         /// </summary>
@@ -141,7 +143,6 @@ namespace ThunderstormNotification
 
             ComparisonAreaRect.Width = 0;
             ComparisonAreaRect.Height = 0;
-
         }
 
         /// <summary>
@@ -151,7 +152,7 @@ namespace ThunderstormNotification
         /// <param name="e"></param>
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            // 「マウスを左クリックしていないとき、描画中のオブジェクトが無いとき」は何もしない
+            // 「マウスを左クリックしていないとき」は何もしない
             if (e.LeftButton == MouseButtonState.Released)
             {
                 return;
@@ -180,10 +181,21 @@ namespace ThunderstormNotification
         private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
             CanvasImage.Visibility = Visibility.Hidden;
+
+            viewRectCheck.IsChecked = prevViewRectCheckedState;
         }
 
+        /// <summary>
+        /// 比較領域設定ボタンイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void SetRectButton_Click(object sender, RoutedEventArgs e)
         {
+            //前のチェック状態を保持
+            prevViewRectCheckedState = viewRectCheck.IsChecked;
+            viewRectCheck.IsChecked = true;
+
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
@@ -301,8 +313,10 @@ namespace ThunderstormNotification
                     foreach (Bitmap bitmap in bitmaps)
                     {
                         using (Bitmap bitmap1 = new Bitmap(memoryStream))
-                        using (Mat mat1 = bitmap1.ToMat())
-                        using (Mat mat2 = bitmap.ToMat())
+                        using (Mat matTemp1 = bitmap1.ToMat())
+                        using (Mat matTemp2 = bitmap.ToMat())
+                        using (Mat mat1 = matTemp1.Clone(new OpenCvSharp.Rect((int)Canvas.GetLeft(ComparisonAreaRect), (int)Canvas.GetTop(ComparisonAreaRect), (int)ComparisonAreaRect.Width, (int)ComparisonAreaRect.Height)))
+                        using (Mat mat2 = matTemp2.Clone(new OpenCvSharp.Rect((int)Canvas.GetLeft(ComparisonAreaRect), (int)Canvas.GetTop(ComparisonAreaRect), (int)ComparisonAreaRect.Width, (int)ComparisonAreaRect.Height)))
                         {
                             float match = await Task.Run(() => ImageMatch(mat1, mat2, false));
                             if (match < result)
