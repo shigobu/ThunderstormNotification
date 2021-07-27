@@ -359,6 +359,10 @@ namespace ThunderstormNotification
         /// <returns></returns>
         private float ImageMatch(Mat mat1, Mat mat2, bool show)
         {
+            if (mat1.Empty() || mat2.Empty())
+            {
+                return 0;
+            }
 
             using (var descriptors1 = new Mat())
             using (var descriptors2 = new Mat())
