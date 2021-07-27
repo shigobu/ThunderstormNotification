@@ -153,11 +153,16 @@ namespace ThunderstormNotification
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            //比較用画像の読み込み
             foreach (var fileName in GetImageFileNames())
             {
                 bitmaps.Add(new Bitmap(fileName));
             }
             CountImage();
+
+            //比較領域矩形の初期化
+            ComparisonAreaRect.Width = webView.ActualWidth;
+            ComparisonAreaRect.Height = webView.ActualHeight;
 
             //タイマ作成とスタート
             timer = new DispatcherTimer();
