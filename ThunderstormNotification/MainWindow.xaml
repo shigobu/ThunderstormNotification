@@ -23,6 +23,7 @@
                 <Border BorderBrush="Black" BorderThickness="1" Width="1" Margin="10, 3, 10, 3"/>
                 <Button Name="setRectButton" Content="比較領域の設定" Margin="3" Click="SetRectButton_Click"/>
                 <CheckBox Name="viewRectCheck" Content="比較領域の表示" Margin="3" VerticalAlignment="Center"/>
+                <Button Name="resetRectButton" Content="比較領域のリセット" Margin="3" Click="ResetRectButton_Click"/>
             </StackPanel>
             <DockPanel>
                 <Button x:Name="ButtonGo" DockPanel.Dock="Right" Click="ButtonGo_Click" Content="Go"/>

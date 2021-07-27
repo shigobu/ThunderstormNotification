@@ -205,6 +205,20 @@ namespace ThunderstormNotification
             }
         }
 
+        /// <summary>
+        /// 比較領域のリセットボタンイベント
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ResetRectButton_Click(object sender, RoutedEventArgs e)
+        {
+            //比較領域矩形の初期化
+            ComparisonAreaRect.Width = webView.ActualWidth;
+            ComparisonAreaRect.Height = webView.ActualHeight;
+            Canvas.SetLeft(ComparisonAreaRect, 0);
+            Canvas.SetTop(ComparisonAreaRect, 0);
+        }
+
         private async void SetButton_Click(object sender, RoutedEventArgs e)
         {
             string assemblyDir = GetAssemblyDirectory();
