@@ -20,6 +20,8 @@
                 <TextBox Name="resultTextBox" IsReadOnly="True" Width="50" Margin="3"/>
                 <TextBlock Text="しきい値" TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
                 <TextBox Name="thresholdTextBox" Text="100" IsReadOnly="False" Width="40" Margin="3"/>
+                <Border BorderBrush="Black" BorderThickness="1" Width="1" Margin="10, 3, 10, 3"/>
+                <Button Name="setRectButton" Content="比較領域の設定" Margin="3"/>
                 <CheckBox Name="viewRectCheck" Content="比較領域の表示" Margin="3" VerticalAlignment="Center"/>
             </StackPanel>
             <DockPanel>
@@ -28,16 +30,17 @@
             </DockPanel>
             <ProgressBar Name="progressBar"/>
         </StackPanel>
-        <Canvas Width="850" Height="477">
+        <Grid>
             <wv2:WebView2 Name="webView" Width="850" Height="477"
                         Source="https://www.youtube.com/channel/UC0uqvdnOJBflreC3WJEpFyQ" NavigationStarting="WebView_NavigationStarting" NavigationCompleted="WebView_NavigationCompleted"/>
             <!--WebView2は特殊な描画方法を使用しているため、普通の方法ではコントロールのオーバーレイができない。Popupを使用することで回避できる。-->
-            <Popup IsOpen="True" AllowsTransparency="True" Placement="Center" PlacementTarget="{Binding ElementName=webView}" Canvas.Left="0" Canvas.Top="0">
-                <Rectangle Name="ComparisonAreaRect" Width="{Binding ElementName=webView, Path=ActualWidth}" Height="{Binding ElementName=webView, Path=ActualHeight}"
-                           Stroke="Red" StrokeThickness="2" Fill="Transparent" 
+            <Popup IsOpen="True" AllowsTransparency="True" Placement="Center" PlacementTarget="{Binding ElementName=webView}">
+                <Canvas Width="{Binding ElementName=webView, Path=ActualWidth}" Height="{Binding ElementName=webView, Path=ActualHeight}">
+                    <Rectangle Name="ComparisonAreaRect" Width="100" Height="100"
+                           Stroke="Red" StrokeThickness="2" Fill="Transparent" Canvas.Left="0" Canvas.Top="0"
                            Visibility="{Binding Path=IsChecked, ElementName=viewRectCheck, Converter={StaticResource BoolVisibilityConverter}}"/>
+                </Canvas>
             </Popup>
-        </Canvas>
-        
+        </Grid>
     </DockPanel>
 </Window>
