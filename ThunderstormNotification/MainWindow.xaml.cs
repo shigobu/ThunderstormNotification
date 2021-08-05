@@ -51,7 +51,15 @@ namespace ThunderstormNotification
         {
             float prev = comparisonResult;
 
-            ImageSource imageSource = await ComparisonImage();
+            ImageSource imageSource = null;
+            try
+            {
+                imageSource = await ComparisonImage();
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
 
             float aftar = comparisonResult;
             resultTextBox.Text = comparisonResult.ToString("f");
