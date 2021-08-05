@@ -18,12 +18,12 @@ namespace ThunderstormNotification
         private static Bitmap ConvertImageGray(Bitmap img)
         {
             using (var destination = new Mat())
-            using (var source = BitmapConverter.ToMat(img))
+            using (var source = img.ToMat())
             {
                 // グレースケール
                 Cv2.CvtColor(source, destination, ColorConversionCodes.RGB2GRAY);
 
-                return BitmapConverter.ToBitmap(destination);
+                return destination.ToBitmap();
             }
         }
 
