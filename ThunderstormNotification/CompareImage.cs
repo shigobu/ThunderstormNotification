@@ -17,13 +17,13 @@ namespace ThunderstormNotification
         /// <param name="img">グレースケール化する画像ファイル</param>
         private static Bitmap ConvertImageGray(Bitmap img)
         {
-            using (var dst = new Mat())
-            using (var src = BitmapConverter.ToMat(img))
+            using (var destination = new Mat())
+            using (var source = BitmapConverter.ToMat(img))
             {
-                // グレイスケール
-                Cv2.CvtColor(src, dst, ColorConversionCodes.RGB2GRAY);
+                // グレースケール
+                Cv2.CvtColor(source, destination, ColorConversionCodes.RGB2GRAY);
 
-                return BitmapConverter.ToBitmap(dst);
+                return BitmapConverter.ToBitmap(destination);
             }
         }
 
