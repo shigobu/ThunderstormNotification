@@ -54,7 +54,7 @@ namespace ThunderstormNotification
             ImageSource imageSource = null;
             try
             {
-                imageSource = await ComparisonImage();
+                imageSource = await ComparisonImage2();
             }
             catch (Exception ex)
             {
@@ -319,12 +319,6 @@ namespace ThunderstormNotification
         /// </summary>
         private async Task<ImageSource> ComparisonImage()
         {
-            string[] fileNames = GetImageFileNames();
-            if (fileNames.Length == 0)
-            {
-                return null;
-            }
-
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
@@ -341,6 +335,40 @@ namespace ThunderstormNotification
                         using (Mat mat2 = matTemp2.Clone(new OpenCvSharp.Rect((int)Canvas.GetLeft(ComparisonAreaRect), (int)Canvas.GetTop(ComparisonAreaRect), (int)ComparisonAreaRect.Width, (int)ComparisonAreaRect.Height)))
                         {
                             float match = await Task.Run(() => ImageMatch(mat1, mat2, false));
+                            if (match < result)
+                            {
+                                result = match;
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release(); // 違うスレッドでロックを解放してもOK
+                }
+                comparisonResult = result;
+
+                return BitmapFrame.Create(memoryStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            }
+        }
+
+        /// <summary>
+        /// 標準画像と比較し、comparisonResultメンバー変数を更新します。
+        /// </summary>
+        private async Task<ImageSource> ComparisonImage2()
+        {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                await webView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, memoryStream);
+                float result = float.MaxValue;
+                await _semaphore.WaitAsync(); // ロックを取得する
+                try
+                {
+                    foreach (Bitmap bitmap in bitmaps)
+                    {
+                        using (Bitmap bitmap1 = new Bitmap(memoryStream))
+                        {
+                            int match = await Task.Run(() => CompareImage.CalcHammingDistance(bitmap, bitmap1));
                             if (match < result)
                             {
                                 result = match;
