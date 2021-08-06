@@ -76,7 +76,7 @@ namespace ThunderstormNotification
             }
 
             //前がしきい値以上で、あとがしきい値以下の場合
-            if (prev > threshold && aftar < threshold)
+            if (prev >= threshold && aftar < threshold)
             {
                 StackPanel stackPanel = new StackPanel();
                 TextBlock textBlock = new TextBlock();
@@ -88,9 +88,21 @@ namespace ThunderstormNotification
                 stackPanel.Children.Add(image);
 
                 var notificationManager = new NotificationManager();
-                notificationManager.Show(stackPanel, null);
+                notificationManager.Show(stackPanel, null, null, Notification_Click);
                 System.Media.SystemSounds.Asterisk.Play();
             }
+        }
+
+        /// <summary>
+        /// 通知が押されたときのメソッド
+        /// </summary>
+        private void Notification_Click()
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            this.Activate();
         }
 
         /// <summary>
